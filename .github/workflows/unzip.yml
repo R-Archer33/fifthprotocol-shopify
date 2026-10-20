@@ -1,23 +1,49 @@
-name: Unzip Theme
+```yaml
+name: Unzip Shopify Theme
+
 on:
-  push:
-    branches:
-      - master
   workflow_dispatch:
+  push:
+    paths:
+      - '**.zip'
+
+permissions:
+  contents: write
 
 jobs:
   unzip:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Unzip Theme File
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          fetch-depth: 0
+
+      - name: Unzip theme files
         run: |
-          find . -maxdepth 1 -name "*.zip" -exec unzip {} \;
-          find . -maxdepth 1 -name "*.zip" -exec rm {} \;
-      - name: Commit Unzipped Files
+          shopt -s nullglob globstar
+          zips=(**/*.zip)
+          if [ ${#zips[@]} -eq 0 ]; then
+            echo "No zip files found."
+            exit 0
+          fi
+          for zip in "${zips[@]}"; do
+            echo "Extracting $zip"
+            unzip -o "$zip" -d "$(dirname "$zip")"
+            rm -f "$zip"
+          done
+
+      - name: Commit and push extracted files
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          git add .
-          git commit -m "Automated Unzip of Theme"
-          git push
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+            exit 0
+          fi
+          git commit -m "Extract Shopify theme zip"
+          git push origin HEAD:${{ github.ref_name }}
+```
