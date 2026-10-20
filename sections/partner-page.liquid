@@ -1,0 +1,1364 @@
+{%- liquid
+  assign partner = page.metafields.custom.partner.value
+
+  assign partner_name = partner.partner_name.value | default: page.title
+  assign partner_logo = partner.logo.value
+  assign hero_image = partner.hero_image.value
+  assign discount_code = partner.discount_code.value | strip
+  assign target_collection = partner.target_collection.value
+  assign donation_link = partner.direct_donation_link.value
+  assign primary_hex = partner.primary_color_hex.value | default: section.settings.fallback_color | append: ''
+
+  assign primary_hover = primary_hex | color_darken: 10
+  assign primary_tint = primary_hex | color_modify: 'alpha', 0.1
+  assign primary_shadow = primary_hex | color_modify: 'alpha', 0.3
+  assign primary_brightness = primary_hex | color_brightness
+  assign on_primary = '#FFFFFF'
+  if primary_brightness > 170
+    assign on_primary = '#111111'
+  endif
+
+  assign discount_query = ''
+  if discount_code != blank
+    assign discount_query = discount_code | url_encode | prepend: '?discount='
+  endif
+
+  if target_collection != blank
+    assign shop_url = target_collection.url | append: discount_query
+  else
+    assign shop_url = routes.all_products_collection_url | append: discount_query
+  endif
+
+  assign bridge_heading = partner.bridge_heading.value | default: section.settings.bridge_heading
+
+  assign current_year = 'now' | date: '%Y'
+
+  assign learning_cells = shop.metaobjects.learning_cell.values
+  assign phases = '1,2,3,4,5' | split: ','
+  assign protocols = 'body,mind,soul,earth,universe' | split: ','
+  assign phase_labels = '1. Awareness,2. Discipline,3. Integration,4. Mastery,5. Alignment' | split: ','
+-%}
+
+{% style %}
+  @font-face {
+    font-family: 'FP Cinzel';
+    src: url('https://cdn.shopify.com/s/files/1/0690/4522/3590/files/Cinzel-VariableFont_wght.ttf?v=1792451898') format('truetype');
+    font-weight: 400 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: 'FP Raleway';
+    src: url('https://cdn.shopify.com/s/files/1/0690/4522/3590/files/Raleway-VariableFont_wght.ttf?v=1792451945') format('truetype');
+    font-weight: 100 900;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  #shopify-section-{{ section.id }} .fp-partner-page {
+    --fp-primary: {{ primary_hex }};
+    --fp-primary-hover: {{ primary_hover }};
+    --fp-primary-tint: {{ primary_tint }};
+    --fp-primary-shadow: {{ primary_shadow }};
+    --fp-on-primary: {{ on_primary }};
+  }
+{% endstyle %}
+
+{%- if partner != blank -%}
+  <div class="fp-partner-page" id="fp-partner-{{ section.id }}">
+    <section class="fp-hero">
+      {%- if hero_image != blank -%}
+        {{
+          hero_image
+          | image_url: width: 2400
+          | image_tag:
+            class: 'fp-hero__image',
+            loading: 'eager',
+            fetchpriority: 'high',
+            widths: '750, 1100, 1500, 1800, 2400',
+            sizes: '100vw',
+            alt: partner_name
+        }}
+      {%- endif -%}
+      <div class="fp-hero__overlay" aria-hidden="true"></div>
+      <div class="fp-wrap fp-hero__content">
+        {%- if partner_logo != blank -%}
+          <div class="fp-hero__logo">
+            {{
+              partner_logo
+              | image_url: width: 660
+              | image_tag:
+                class: 'fp-hero__logo-img',
+                loading: 'eager',
+                widths: '220, 440, 660',
+                sizes: '220px',
+                alt: partner_name
+            }}
+          </div>
+        {%- endif -%}
+        <span class="fp-kicker">{{ section.settings.hero_kicker }}</span>
+        <h1 class="fp-hero__title">{{ partner_name | escape }}</h1>
+        {%- if section.settings.hero_text != blank -%}
+          <p class="fp-hero__text">{{ section.settings.hero_text }}</p>
+        {%- endif -%}
+        <a href="{{ shop_url }}" class="fp-btn fp-btn--primary">{{ section.settings.cta_label }}</a>
+        {%- if discount_code != blank -%}
+          <p class="fp-hero__offer">
+            {{ section.settings.offer_label }} <span class="fp-code">{{ discount_code | escape }}</span>
+          </p>
+        {%- endif -%}
+      </div>
+    </section>
+
+    {%- if target_collection != blank and target_collection.products_count > 0 -%}
+      <section class="fp-sec fp-sec--stars">
+        <div class="fp-wrap">
+          <span class="fp-kicker fp-kicker--light">{{ section.settings.products_kicker }}</span>
+          <h2 class="fp-heading fp-heading--light">{{ section.settings.products_heading }}</h2>
+          <div class="fp-grid" data-fp-grid>
+            {%- assign rendered = 0 -%}
+            {%- for product in target_collection.products limit: 24 -%}
+              {%- if product.available == false -%}
+                {%- continue -%}
+              {%- endif -%}
+              {%- liquid
+                assign product_url = product.url | append: discount_query
+                assign product_image = product.featured_image
+              -%}
+              <article class="fp-card" data-fp-card{% if rendered >= 3 %} hidden{% endif %}>
+                <a href="{{ product_url }}" class="fp-card__media" tabindex="-1" aria-hidden="true">
+                  {%- if product_image != blank -%}
+                    {{
+                      product_image
+                      | image_url: width: 800
+                      | image_tag:
+                        class: 'fp-card__img',
+                        loading: 'lazy',
+                        widths: '300, 450, 600, 800',
+                        sizes: '(min-width: 990px) 33vw, (min-width: 750px) 50vw, 100vw',
+                        alt: product.title
+                    }}
+                  {%- else -%}
+                    {{ 'product-1' | placeholder_svg_tag: 'fp-card__placeholder' }}
+                  {%- endif -%}
+                </a>
+                <div class="fp-card__body">
+                  <h3 class="fp-card__title">
+                    <a href="{{ product_url }}">{{ product.title | escape }}</a>
+                  </h3>
+                  <span class="fp-card__price">{{ product.price | money }}</span>
+                  <a href="{{ product_url }}" class="fp-btn fp-btn--primary fp-btn--block">{{ section.settings.product_button_label }}</a>
+                </div>
+              </article>
+              {%- assign rendered = rendered | plus: 1 -%}
+            {%- endfor -%}
+          </div>
+        </div>
+      </section>
+    {%- endif -%}
+
+    <section class="fp-sec fp-sec--stars fp-sec--grid">
+      <div class="fp-wrap">
+        <span class="fp-kicker fp-kicker--light">{{ section.settings.bridge_kicker }}</span>
+        {%- if bridge_heading != blank -%}
+          <h2 class="fp-heading fp-heading--light">{{ bridge_heading | escape }}</h2>
+        {%- endif -%}
+        {%- if section.settings.matrix_text != blank -%}
+          <p class="fp-m5__intro">{{ section.settings.matrix_text }}</p>
+        {%- endif -%}
+
+        <div class="fp-m5">
+          <div class="fp-m5__head" aria-hidden="true">
+            <div class="fp-m5__corner">{{ section.settings.phase_column_label }}</div>
+            {%- for protocol_handle in protocols -%}
+              {%- liquid
+                assign protocol_entry = shop.metaobjects.protocol[protocol_handle]
+                assign protocol_display = protocol_entry.protocol_name.value | default: protocol_handle | capitalize
+              -%}
+              <div class="fp-m5__protocol">
+                {%- if protocol_entry.shield_image.value != blank -%}
+                  <span class="fp-m5__shield">
+                    {{
+                      protocol_entry.shield_image.value
+                      | image_url: width: 240
+                      | image_tag:
+                        class: 'fp-m5__shield-img',
+                        loading: 'lazy',
+                        widths: '120, 180, 240',
+                        sizes: '80px',
+                        alt: ''
+                    }}
+                  </span>
+                {%- endif -%}
+                <span class="fp-m5__protocol-name">{{ protocol_display | escape }}</span>
+                {%- if protocol_entry.description != blank -%}
+                  <span class="fp-m5__protocol-desc">{{ protocol_entry.description | metafield_text | truncatewords: 12 }}</span>
+                {%- endif -%}
+              </div>
+            {%- endfor -%}
+          </div>
+
+          {%- for phase_number in phases -%}
+            {%- assign phase_label = phase_labels[forloop.index0] -%}
+            <div class="fp-m5__row" data-fp-phase="{{ phase_number }}">
+              <div class="fp-m5__phase">
+                <h3 class="fp-m5__phase-name">{{ phase_label | escape }}</h3>
+              </div>
+              {%- for protocol_handle in protocols -%}
+                {%- liquid
+                  assign matched_cell = false
+                  for cell in learning_cells
+                    assign cell_phase = cell.phase.value | append: '' | strip
+                    assign cell_protocol_handle = cell.protocol.value.system.handle | append: '' | strip
+                    if cell_phase == phase_number and cell_protocol_handle == protocol_handle
+                      assign matched_cell = cell
+                      break
+                    endif
+                  endfor
+                  assign protocol_display = shop.metaobjects.protocol[protocol_handle].protocol_name.value | default: protocol_handle | capitalize
+                -%}
+                {%- if matched_cell -%}
+                  <article class="fp-m5__cell" data-fp-protocol="{{ protocol_handle }}" data-fp-phase="{{ phase_number }}">
+                    <span class="fp-m5__cell-protocol">{{ protocol_display | escape }}</span>
+                    <h4 class="fp-m5__cell-title">{{ matched_cell.cell_title.value | escape }}</h4>
+                    <div class="fp-m5__panels">
+                      {%- if matched_cell.lesson_content != blank -%}
+                        <details class="fp-m5__panel" data-fp-panel="lesson">
+                          <summary class="fp-m5__trigger">{{ section.settings.lesson_label }}</summary>
+                          <div class="fp-m5__content">{{ matched_cell.lesson_content | metafield_tag }}</div>
+                        </details>
+                      {%- endif -%}
+                      {%- if matched_cell.practice_reflection != blank -%}
+                        <details class="fp-m5__panel" data-fp-panel="practice">
+                          <summary class="fp-m5__trigger">{{ section.settings.practice_label }}</summary>
+                          <div class="fp-m5__content">{{ matched_cell.practice_reflection | metafield_tag }}</div>
+                        </details>
+                      {%- endif -%}
+                    </div>
+                  </article>
+                {%- else -%}
+                  <div class="fp-cell fp-m5__cell fp-m5__cell--empty" aria-hidden="true" data-fp-protocol="{{ protocol_handle }}" data-fp-phase="{{ phase_number }}"></div>
+                {%- endif -%}
+              {%- endfor -%}
+            </div>
+          {%- endfor -%}
+        </div>
+      </div>
+    </section>
+
+    {%- if donation_link != blank -%}
+      <div class="fp-donate">
+        <div class="fp-wrap">
+          <a href="{{ donation_link }}" class="fp-donate__link" target="_blank" rel="noopener noreferrer">{{ section.settings.donate_label }}</a>
+        </div>
+      </div>
+    {%- endif -%}
+
+    <footer class="fp-footer">
+      <div class="fp-wrap fp-footer__inner">
+        <div class="fp-footer__brands">
+          <div class="fp-footer__brand">
+            {%- if section.settings.hk_logo != blank -%}
+              <span class="fp-footer__logo">
+                {{
+                  section.settings.hk_logo
+                  | image_url: width: 780
+                  | image_tag:
+                    class: 'fp-footer__logo-img',
+                    loading: 'lazy',
+                    widths: '260, 520, 780',
+                    sizes: '(min-width: 750px) 260px, 150px',
+                    alt: section.settings.hk_name
+                }}
+              </span>
+            {%- else -%}
+              <span class="fp-footer__wordmark">{{ section.settings.hk_name | escape }}</span>
+            {%- endif -%}
+          </div>
+          <span class="fp-footer__divider" aria-hidden="true"></span>
+          <div class="fp-footer__brand">
+            {%- if section.settings.fp_logo != blank -%}
+              <span class="fp-footer__logo">
+                {{
+                  section.settings.fp_logo
+                  | image_url: width: 780
+                  | image_tag:
+                    class: 'fp-footer__logo-img',
+                    loading: 'lazy',
+                    widths: '260, 520, 780',
+                    sizes: '(min-width: 750px) 260px, 150px',
+                    alt: section.settings.fp_name
+                }}
+              </span>
+            {%- else -%}
+              <span class="fp-footer__wordmark">{{ section.settings.fp_name | escape }}</span>
+            {%- endif -%}
+          </div>
+        </div>
+
+        <div class="fp-footer__bottom">
+          <p class="fp-footer__copy">&copy; {{ current_year }} Fifth Protocol. All rights reserved.</p>
+          <nav class="fp-footer__nav" aria-label="Legal">
+            <a href="/policies/privacy-policy" class="fp-footer__link">Privacy Policy</a>
+            <a href="/policies/terms-of-service" class="fp-footer__link">Terms of Service</a>
+            <a href="/pages/contact" class="fp-footer__link">Contact</a>
+          </nav>
+        </div>
+      </div>
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var root = document.getElementById('fp-partner-{{ section.id }}');
+      if (!root) return;
+      var grid = root.querySelector('[data-fp-grid]');
+      if (!grid) return;
+      var cards = Array.prototype.slice.call(grid.querySelectorAll('[data-fp-card]'));
+      for (var i = cards.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var swap = cards[i];
+        cards[i] = cards[j];
+        cards[j] = swap;
+      }
+      cards.forEach(function (card, index) {
+        card.hidden = index >= 3;
+        grid.appendChild(card);
+      });
+    })();
+  </script>
+{%- elsif request.design_mode -%}
+  <div class="fp-partner-page">
+    <div class="fp-wrap fp-empty">
+      <p>Select a partner in this page's custom.partner metafield to display the partner page.</p>
+    </div>
+  </div>
+{%- endif -%}
+
+{% stylesheet %}
+  .fp-partner-page {
+    --fp-ink: #1a1a1a;
+    --fp-ink-soft: #555555;
+    --fp-line: #e4e4e4;
+    --fp-light: #f6f6f4;
+    --fp-dark: #121212;
+    --fp-heading-font: 'FP Cinzel', Georgia, 'Times New Roman', serif;
+    --fp-body-font: 'FP Raleway', 'Helvetica Neue', Arial, sans-serif;
+    display: block !important;
+    width: 100%;
+    background: #ffffff !important;
+    color: var(--fp-ink) !important;
+    font-family: var(--fp-body-font) !important;
+    font-size: 16px !important;
+    line-height: 1.6 !important;
+    letter-spacing: normal !important;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .fp-partner-page *,
+  .fp-partner-page *::before,
+  .fp-partner-page *::after {
+    box-sizing: border-box !important;
+  }
+
+  .fp-partner-page h1,
+  .fp-partner-page h2,
+  .fp-partner-page h3,
+  .fp-partner-page h4,
+  .fp-partner-page p {
+    margin: 0;
+    padding: 0;
+  }
+
+  .fp-partner-page h1,
+  .fp-partner-page h2,
+  .fp-partner-page h3,
+  .fp-partner-page h4 {
+    font-family: var(--fp-heading-font) !important;
+    letter-spacing: 0.02em !important;
+    text-transform: none !important;
+  }
+
+  .fp-partner-page p,
+  .fp-partner-page a,
+  .fp-partner-page span {
+    font-family: var(--fp-body-font);
+  }
+
+  .fp-partner-page a {
+    color: inherit;
+    text-decoration: none !important;
+  }
+
+  .fp-partner-page img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+  }
+
+  .fp-partner-page [hidden] {
+    display: none !important;
+  }
+
+  .fp-partner-page .fp-wrap {
+    width: 100%;
+    max-width: 1180px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .fp-partner-page .fp-sec {
+    padding: 80px 0;
+  }
+
+  .fp-partner-page .fp-sec--stars {
+    position: relative;
+    overflow: hidden;
+    background-color: #0a0a0a !important;
+    background-image:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(255, 255, 255, 0.05) 0%, transparent 70%),
+      radial-gradient(1px 1px at 24px 36px, rgba(255, 255, 255, 0.55) 50%, transparent 100%),
+      radial-gradient(1px 1px at 132px 84px, rgba(255, 255, 255, 0.35) 50%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 212px 158px, rgba(255, 255, 255, 0.45) 50%, transparent 100%),
+      radial-gradient(1px 1px at 68px 214px, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+      radial-gradient(1px 1px at 248px 32px, rgba(255, 255, 255, 0.4) 50%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 96px 136px, rgba(201, 162, 39, 0.45) 50%, transparent 100%),
+      radial-gradient(1px 1px at 176px 246px, rgba(255, 255, 255, 0.25) 50%, transparent 100%) !important;
+    background-size: 100% 100%, 280px 280px, 280px 280px, 280px 280px, 280px 280px, 280px 280px, 280px 280px, 280px 280px !important;
+  }
+
+  .fp-partner-page .fp-sec--stars::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background-image:
+      radial-gradient(1px 1px at 40px 90px, rgba(255, 255, 255, 0.3) 50%, transparent 100%),
+      radial-gradient(1px 1px at 310px 20px, rgba(255, 255, 255, 0.45) 50%, transparent 100%),
+      radial-gradient(1.5px 1.5px at 180px 330px, rgba(255, 255, 255, 0.35) 50%, transparent 100%),
+      radial-gradient(1px 1px at 400px 210px, rgba(255, 255, 255, 0.25) 50%, transparent 100%);
+    background-size: 460px 460px;
+    opacity: 0.8;
+    pointer-events: none;
+  }
+
+  .fp-partner-page .fp-sec--stars .fp-wrap {
+    position: relative;
+    z-index: 1;
+  }
+
+  .fp-partner-page .fp-sec--grid {
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+  .fp-partner-page .fp-sec--grid::after {
+    content: '';
+    position: absolute;
+    top: 30%;
+    left: 50%;
+    width: min(1100px, 120%);
+    height: 520px;
+    background: radial-gradient(ellipse at center, var(--fp-primary-tint) 0%, transparent 70%);
+    filter: blur(70px);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .fp-partner-page .fp-kicker {
+    display: inline-block;
+    margin-bottom: 12px;
+    font-size: 12px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.22em !important;
+    text-transform: uppercase !important;
+    color: var(--fp-primary) !important;
+  }
+
+  .fp-partner-page .fp-kicker--light {
+    color: #ffffff !important;
+    opacity: 0.75;
+  }
+
+  .fp-partner-page .fp-heading {
+    font-size: clamp(28px, 3.6vw, 42px) !important;
+    font-weight: 700 !important;
+    line-height: 1.15 !important;
+    color: var(--fp-ink) !important;
+  }
+
+  .fp-partner-page .fp-heading--light {
+    color: #ffffff !important;
+  }
+
+  .fp-partner-page .fp-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    min-height: 50px;
+    padding: 14px 30px !important;
+    border: 2px solid transparent !important;
+    border-radius: 8px !important;
+    font-family: var(--fp-body-font) !important;
+    font-size: 14px !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    line-height: 1.1 !important;
+    text-align: center;
+    cursor: pointer;
+    box-shadow: none;
+    transition: background-color 0.15s ease, transform 0.15s ease, box-shadow 0.15s ease;
+  }
+
+  .fp-partner-page .fp-btn--primary {
+    background: var(--fp-primary) !important;
+    color: var(--fp-on-primary) !important;
+    box-shadow: 0 8px 20px var(--fp-primary-shadow);
+  }
+
+  .fp-partner-page .fp-btn--primary:hover {
+    background: var(--fp-primary-hover) !important;
+    transform: translateY(-2px);
+  }
+
+  .fp-partner-page .fp-btn--block {
+    width: 100%;
+  }
+
+  .fp-partner-page a:focus-visible {
+    outline: 3px solid var(--fp-primary) !important;
+    outline-offset: 3px !important;
+  }
+
+  .fp-partner-page .fp-hero {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: min(82vh, 760px);
+    padding: 120px 0 80px;
+    overflow: hidden;
+    background: var(--fp-dark) !important;
+    color: #ffffff;
+  }
+
+  .fp-partner-page .fp-hero__image {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .fp-partner-page .fp-hero__overlay {
+    display: block !important;
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0.75) 100%);
+  }
+
+  .fp-partner-page .fp-hero__content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .fp-partner-page .fp-hero__logo {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: flex-start;
+    width: 220px;
+    height: 120px;
+    margin-bottom: 24px;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  .fp-partner-page .fp-hero__logo-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: left center;
+  }
+
+  .fp-partner-page .fp-hero .fp-kicker {
+    color: #ffffff !important;
+    opacity: 0.85;
+  }
+
+  .fp-partner-page .fp-hero__title {
+    max-width: 16ch;
+    font-size: clamp(36px, 6vw, 72px) !important;
+    font-weight: 800 !important;
+    line-height: 1.05 !important;
+    color: #ffffff !important;
+  }
+
+  .fp-partner-page .fp-hero__text {
+    max-width: 48ch;
+    margin: 18px 0 30px;
+    font-size: 18px;
+    color: rgba(255, 255, 255, 0.86);
+  }
+
+  .fp-partner-page .fp-hero__title + .fp-btn {
+    margin-top: 30px;
+  }
+
+  .fp-partner-page .fp-hero__offer {
+    margin-top: 18px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .fp-partner-page .fp-code {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 3px 10px;
+    border: 1px dashed var(--fp-primary);
+    border-radius: 6px;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .fp-partner-page .fp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+    margin-top: 36px;
+  }
+
+  .fp-partner-page .fp-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.04) !important;
+    backdrop-filter: blur(6px);
+    transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  }
+
+  .fp-partner-page .fp-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255, 255, 255, 0.22);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.5);
+  }
+
+  .fp-partner-page .fp-card__media {
+    display: block !important;
+    position: relative;
+    aspect-ratio: 1 / 1;
+    overflow: hidden;
+    background: #141414;
+  }
+
+  .fp-partner-page .fp-card__img {
+    position: absolute;
+    inset: 0;
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: cover;
+  }
+
+  .fp-partner-page .fp-card__placeholder {
+    width: 100%;
+    height: 100%;
+    fill: rgba(255, 255, 255, 0.15);
+  }
+
+  .fp-partner-page .fp-card__body {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    gap: 10px;
+    padding: 22px;
+  }
+
+  .fp-partner-page .fp-card__title {
+    font-size: 18px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    color: #ffffff !important;
+  }
+
+  .fp-partner-page .fp-card__title a {
+    color: #ffffff !important;
+  }
+
+  .fp-partner-page .fp-card__title a:hover {
+    color: rgba(255, 255, 255, 0.75) !important;
+  }
+
+  .fp-partner-page .fp-card__price {
+    flex-grow: 1;
+    font-size: 16px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.72) !important;
+  }
+
+  .fp-partner-page .fp-m5__intro {
+    max-width: 62ch;
+    margin-top: 14px;
+    font-size: 16px;
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+
+  .fp-partner-page .fp-m5 {
+    --fp-phase-col: 180px;
+    display: grid;
+    gap: 12px;
+    margin-top: 44px;
+  }
+
+  .fp-partner-page .fp-m5__head,
+  .fp-partner-page .fp-m5__row {
+    display: grid;
+    grid-template-columns: var(--fp-phase-col) repeat(5, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .fp-partner-page .fp-m5__head {
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .fp-partner-page .fp-m5__corner {
+    display: flex !important;
+    align-items: flex-end;
+    padding: 0 4px 6px;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.45) !important;
+  }
+
+  .fp-partner-page .fp-m5__protocol {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 6px 4px;
+    text-align: center;
+  }
+
+  .fp-partner-page .fp-m5__shield {
+    display: block;
+    width: 80px;
+    height: 80px;
+    filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.55));
+  }
+
+  .fp-partner-page .fp-m5__shield-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain;
+  }
+
+  .fp-partner-page .fp-m5__protocol-name {
+    font-family: var(--fp-heading-font) !important;
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #ffffff !important;
+  }
+
+  .fp-partner-page .fp-m5__protocol-desc {
+    font-size: 12px;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.55) !important;
+  }
+
+  .fp-partner-page .fp-m5__phase {
+    display: flex;
+    align-items: center;
+    padding: 16px 18px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-left: 3px solid var(--fp-primary);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .fp-partner-page .fp-m5__phase-name {
+    font-size: 16px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.04em !important;
+    color: #ffffff !important;
+  }
+
+  .fp-partner-page .fp-m5__cell {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-height: 132px;
+    padding: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    background: rgba(18, 18, 18, 0.82);
+    backdrop-filter: blur(4px);
+    transition: border-color 0.15s ease, background-color 0.15s ease;
+  }
+
+  .fp-partner-page .fp-m5__cell:not(.fp-m5__cell--empty):hover {
+    border-color: rgba(255, 255, 255, 0.24);
+    background: rgba(26, 26, 26, 0.9);
+  }
+
+  .fp-partner-page .fp-m5__cell--empty {
+    display: block !important;
+    visibility: hidden !important;
+    min-height: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    backdrop-filter: none;
+  }
+
+  .fp-partner-page .fp-m5__cell-protocol {
+    display: none;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--fp-primary) !important;
+  }
+
+  .fp-partner-page .fp-m5__cell-title {
+    font-size: 15px !important;
+    font-weight: 700 !important;
+    line-height: 1.35 !important;
+    color: #ffffff !important;
+  }
+
+  .fp-partner-page .fp-m5__panels {
+    display: flex;
+    flex-direction: column;
+    margin-top: auto;
+  }
+
+  .fp-partner-page .fp-m5__panel {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .fp-partner-page .fp-m5__trigger {
+    display: flex !important;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 10px 0;
+    cursor: pointer;
+    list-style: none !important;
+    font-family: var(--fp-body-font) !important;
+    font-size: 11px !important;
+    font-weight: 700 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.14em !important;
+    text-transform: uppercase !important;
+    text-decoration: none !important;
+    color: var(--fp-primary) !important;
+  }
+
+  .fp-partner-page .fp-m5__trigger::-webkit-details-marker {
+    display: none;
+  }
+
+  .fp-partner-page .fp-m5__trigger::marker {
+    content: '';
+  }
+
+  .fp-partner-page .fp-m5__trigger::after {
+    content: '+';
+    flex-shrink: 0;
+    font-size: 16px;
+    line-height: 1;
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  .fp-partner-page .fp-m5__panel[open] > .fp-m5__trigger::after {
+    content: '\2212';
+  }
+
+  .fp-partner-page a.fp-m5__trigger::after {
+    content: '\2197';
+  }
+
+  .fp-partner-page .fp-m5__trigger:hover {
+    color: #ffffff !important;
+  }
+
+  .fp-partner-page .fp-m5__content {
+    padding-bottom: 12px;
+  }
+
+  .fp-partner-page .fp-m5__content,
+  .fp-partner-page .fp-m5__content p,
+  .fp-partner-page .fp-m5__content li {
+    font-size: 13px;
+    line-height: 1.65;
+    color: rgba(255, 255, 255, 0.75) !important;
+  }
+
+  .fp-partner-page .fp-m5__content p + p {
+    margin-top: 8px;
+  }
+
+  .fp-partner-page .fp-m5__content ul,
+  .fp-partner-page .fp-m5__content ol {
+    margin: 6px 0 0 18px;
+    padding: 0;
+  }
+
+  .fp-partner-page .fp-m5__content strong {
+    color: #ffffff;
+  }
+
+  .fp-partner-page .fp-m5__trigger:focus-visible {
+    outline: 3px solid var(--fp-primary) !important;
+    outline-offset: 3px !important;
+  }
+
+  .fp-partner-page .fp-donate {
+    padding: 28px 0;
+    border-top: 1px solid var(--fp-line);
+    background: var(--fp-light) !important;
+    text-align: center;
+  }
+
+  .fp-partner-page .fp-donate__link {
+    font-size: 14px;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    color: var(--fp-ink-soft) !important;
+    border-bottom: 1px solid var(--fp-primary);
+  }
+
+  .fp-partner-page .fp-donate__link:hover {
+    color: var(--fp-primary) !important;
+  }
+
+  .fp-partner-page .fp-footer {
+    position: relative;
+    overflow: hidden;
+    padding: 64px 0 36px;
+    background: #050505 !important;
+    color: rgba(255, 255, 255, 0.6) !important;
+  }
+
+  .fp-partner-page .fp-footer::after {
+    content: '';
+    position: absolute;
+    top: 42%;
+    left: 50%;
+    width: min(1200px, 140%);
+    height: 640px;
+    background: radial-gradient(ellipse at center, rgba(201, 162, 39, 0.05) 0%, rgba(201, 162, 39, 0.025) 35%, transparent 70%);
+    filter: blur(60px);
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .fp-partner-page .fp-footer__inner {
+    position: relative;
+    z-index: 1;
+  }
+
+  .fp-partner-page .fp-footer::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent 0%, var(--fp-primary) 50%, transparent 100%);
+  }
+
+  .fp-partner-page .fp-footer__brands {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 32px;
+    padding-bottom: 40px;
+  }
+
+  .fp-partner-page .fp-footer__brand {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fp-partner-page .fp-footer__logo {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 260px;
+    height: 130px;
+    padding: 0 !important;
+    border-radius: 0 !important;
+    background: none !important;
+    box-shadow: none !important;
+  }
+
+  .fp-partner-page .fp-footer__logo-img {
+    width: 100% !important;
+    height: 100% !important;
+    object-fit: contain !important;
+    object-position: center;
+  }
+
+  .fp-partner-page .fp-footer__wordmark {
+    font-family: var(--fp-heading-font) !important;
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #ffffff;
+  }
+
+  .fp-partner-page .fp-footer__divider {
+    display: block !important;
+    width: 1px;
+    height: 48px;
+    background: rgba(255, 255, 255, 0.18);
+  }
+
+  .fp-partner-page .fp-footer__bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px 32px;
+    padding-top: 28px;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .fp-partner-page .fp-footer__copy {
+    font-size: 13px;
+    letter-spacing: 0.04em;
+    color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  .fp-partner-page .fp-footer__nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px 28px;
+  }
+
+  .fp-partner-page .fp-footer__link {
+    padding-bottom: 2px;
+    border-bottom: 1px solid transparent;
+    font-size: 12px !important;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.7) !important;
+    transition: color 0.15s ease, border-color 0.15s ease;
+  }
+
+  .fp-partner-page .fp-footer__link:hover {
+    color: #ffffff !important;
+    border-bottom-color: var(--fp-primary);
+  }
+
+  .fp-partner-page .fp-empty {
+    padding: 60px 24px;
+    text-align: center;
+  }
+
+  @media (max-width: 989px) {
+    .fp-partner-page .fp-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .fp-partner-page .fp-m5__head,
+    .fp-partner-page .fp-m5__row {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .fp-partner-page .fp-m5__corner {
+      display: none !important;
+    }
+
+    .fp-partner-page .fp-m5__phase {
+      grid-column: 1 / -1;
+      padding: 12px 16px;
+    }
+
+    .fp-partner-page .fp-m5__shield {
+      width: 60px;
+      height: 60px;
+    }
+
+    .fp-partner-page .fp-m5__protocol-name {
+      font-size: 14px;
+    }
+
+    .fp-partner-page .fp-m5__protocol-desc {
+      display: none !important;
+    }
+
+    .fp-partner-page .fp-m5__cell {
+      min-height: 116px;
+      padding: 12px;
+    }
+  }
+
+  @media (max-width: 749px) {
+    .fp-partner-page .fp-wrap {
+      padding: 0 16px;
+    }
+
+    .fp-partner-page .fp-sec {
+      padding: 56px 0;
+    }
+
+    .fp-partner-page .fp-hero {
+      min-height: 620px;
+      padding: 96px 0 56px;
+    }
+
+    .fp-partner-page .fp-hero .fp-btn {
+      width: 100%;
+    }
+
+    .fp-partner-page .fp-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .fp-partner-page .fp-m5 {
+      gap: 18px;
+      margin-top: 32px;
+    }
+
+    .fp-partner-page .fp-m5__head {
+      display: none !important;
+    }
+
+    .fp-partner-page .fp-m5__row {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 10px;
+      padding: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .fp-partner-page .fp-m5__phase {
+      padding: 0 0 12px;
+      border: 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 0;
+      background: none;
+    }
+
+    .fp-partner-page .fp-m5__phase-name {
+      font-size: 19px !important;
+    }
+
+    .fp-partner-page .fp-m5__cell {
+      min-height: 0;
+      padding: 14px;
+    }
+
+    .fp-partner-page .fp-m5__cell--empty {
+      display: none !important;
+    }
+
+    .fp-partner-page .fp-m5__cell-protocol {
+      display: block !important;
+    }
+
+    .fp-partner-page .fp-m5__content,
+    .fp-partner-page .fp-m5__content p,
+    .fp-partner-page .fp-m5__content li {
+      font-size: 14px;
+    }
+
+    .fp-partner-page .fp-footer {
+      padding: 48px 0 28px;
+    }
+
+    .fp-partner-page .fp-footer__brands {
+      gap: 20px;
+    }
+
+    .fp-partner-page .fp-hero__logo {
+      width: 180px;
+      height: 100px;
+    }
+
+    .fp-partner-page .fp-footer__logo {
+      width: 150px;
+      height: 75px;
+    }
+
+    .fp-partner-page .fp-footer__bottom {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .fp-partner-page .fp-footer__nav {
+      justify-content: center;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fp-partner-page * {
+      transition: none !important;
+    }
+
+    .fp-partner-page .fp-btn--primary:hover,
+    .fp-partner-page .fp-card:hover {
+      transform: none;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Partner Page",
+  "tag": "section",
+  "class": "fp-partner-section",
+  "enabled_on": {
+    "templates": ["page"]
+  },
+  "settings": [
+    {
+      "type": "color",
+      "id": "fallback_color",
+      "label": "Fallback primary color",
+      "default": "#1B6B2F"
+    },
+    {
+      "type": "text",
+      "id": "hero_kicker",
+      "label": "Hero kicker",
+      "default": "Support"
+    },
+    {
+      "type": "textarea",
+      "id": "hero_text",
+      "label": "Hero text",
+      "default": "Choose a Healthy Kindness Tool through this page and help generate support for our community."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Hero button label",
+      "default": "Shop Healthy Kindness Tools"
+    },
+    {
+      "type": "text",
+      "id": "offer_label",
+      "label": "Discount label",
+      "default": "Discount applied automatically at checkout:"
+    },
+    {
+      "type": "text",
+      "id": "products_kicker",
+      "label": "Products kicker",
+      "default": "Shop to Support"
+    },
+    {
+      "type": "text",
+      "id": "products_heading",
+      "label": "Products heading",
+      "default": "Healthy Kindness Tools"
+    },
+    {
+      "type": "text",
+      "id": "product_button_label",
+      "label": "Product button label",
+      "default": "Shop This Tool"
+    },
+    {
+      "type": "header",
+      "content": "5x5 Grid"
+    },
+    {
+      "type": "text",
+      "id": "bridge_kicker",
+      "label": "5x5 kicker",
+      "default": "Fifth Protocol"
+    },
+    {
+      "type": "text",
+      "id": "bridge_heading",
+      "label": "Fallback 5x5 heading",
+      "default": "Every Practice Teaches More Than the Craft",
+      "info": "Used only when the partner's bridge_heading field is empty."
+    },
+    {
+      "type": "textarea",
+      "id": "matrix_text",
+      "label": "5x5 intro",
+      "default": "Five protocols across five phases. Open any lesson to explore its content, practice, and reflection."
+    },
+    {
+      "type": "text",
+      "id": "phase_column_label",
+      "label": "Phase column label",
+      "default": "Phase"
+    },
+    {
+      "type": "text",
+      "id": "lesson_label",
+      "label": "Lesson label",
+      "default": "Lesson"
+    },
+    {
+      "type": "text",
+      "id": "practice_label",
+      "label": "Practice label",
+      "default": "Practice & Reflection"
+    },
+    {
+      "type": "text",
+      "id": "donate_label",
+      "label": "Donate link label",
+      "default": "Donate Directly"
+    },
+    {
+      "type": "header",
+      "content": "Footer"
+    },
+    {
+      "type": "image_picker",
+      "id": "hk_logo",
+      "label": "Healthy Kindness logo"
+    },
+    {
+      "type": "text",
+      "id": "hk_name",
+      "label": "Healthy Kindness name",
+      "default": "Healthy Kindness"
+    },
+    {
+      "type": "image_picker",
+      "id": "fp_logo",
+      "label": "Fifth Protocol logo"
+    },
+    {
+      "type": "text",
+      "id": "fp_name",
+      "label": "Fifth Protocol name",
+      "default": "Fifth Protocol"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Partner Page"
+    }
+  ]
+}
+{% endschema %}

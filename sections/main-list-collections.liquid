@@ -1,0 +1,275 @@
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Raleway:wght@300;400;500;600&display=swap');
+
+body,
+.color-scheme-1, .color-scheme-2,
+.color-background-1, .color-background-2,
+.gradient, [class*="color-"],
+.shopify-section, #MainContent,
+.main-content, .page-width,
+.collection-list-wrapper, .collection-list,
+.section-list-collections-padding,
+[class*="list-collection"] {
+  background: #080e14 !important;
+  background-color: #080e14 !important;
+  color: #d8e0e8 !important;
+}
+
+.collection-list-wrapper h1,
+.collection-list-wrapper .title,
+[class*="list-collection"] h1,
+[class*="list-collection"] .title {
+  font-family: 'Cinzel', serif !important;
+  color: #fff !important;
+  text-align: center !important;
+  font-size: clamp(2rem, 5vw, 3.5rem) !important;
+  letter-spacing: 0.05em !important;
+  margin-bottom: 8px !important;
+}
+
+.collection-list .collection,
+.collection-list__item,
+[class*="list-collection__item"],
+[class*="collection-list"] .card-wrapper {
+  background: rgba(10,25,42,0.85) !important;
+  border: 1px solid rgba(201,168,76,0.2) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  transition: all 0.3s ease !important;
+}
+
+.collection-list .collection:hover,
+.collection-list__item:hover,
+[class*="list-collection__item"]:hover,
+[class*="collection-list"] .card-wrapper:hover {
+  border-color: rgba(201,168,76,0.6) !important;
+  transform: translateY(-4px) !important;
+  box-shadow: 0 12px 40px rgba(201,168,76,0.1) !important;
+}
+
+.collection-list .collection h2,
+.collection-list .collection .card__heading,
+.collection-list .collection .full-unstyled-link,
+[class*="list-collection"] h2,
+[class*="list-collection"] .card__heading,
+[class*="list-collection"] .full-unstyled-link {
+  font-family: 'Cinzel', serif !important;
+  color: #fff !important;
+  font-size: 1rem !important;
+  font-weight: 600 !important;
+  letter-spacing: 0.08em !important;
+  text-transform: uppercase !important;
+}
+
+.collection-list .collection img,
+[class*="list-collection"] img {
+  transition: transform 0.4s ease !important;
+  filter: brightness(0.9) !important;
+}
+
+.collection-list .collection:hover img,
+[class*="list-collection"]:hover img {
+  transform: scale(1.04) !important;
+  filter: brightness(1) !important;
+}
+
+.collection-list .card__content,
+[class*="list-collection"] .card__content,
+.collection-list .card__information,
+[class*="list-collection"] .card__information {
+  background: rgba(10,25,42,0.95) !important;
+  padding: 16px !important;
+  border-top: 1px solid rgba(201,168,76,0.15) !important;
+}
+
+.collection-list a,
+[class*="list-collection"] a {
+  text-decoration: none !important;
+  color: #d8e0e8 !important;
+}
+
+.collection-list a:hover,
+[class*="list-collection"] a:hover {
+  color: #C9A84C !important;
+}
+
+.pagination__list, .pagination { background: transparent !important; }
+.pagination__item, .pagination__item a {
+  color: #d8e0e8 !important;
+  border-color: rgba(201,168,76,0.3) !important;
+  font-family: 'Cinzel', serif !important;
+}
+.pagination__item--current {
+  background: rgba(201,168,76,0.15) !important;
+  color: #C9A84C !important;
+  border-color: #C9A84C !important;
+}
+
+.fp-collections-hero {
+  text-align: center;
+  padding: 60px 24px 40px;
+  background: #080e14;
+}
+
+.fp-collections-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(201,168,76,0.1);
+  border: 1px solid rgba(201,168,76,0.3);
+  border-radius: 30px;
+  padding: 6px 18px;
+  font-family: 'Cinzel', serif;
+  font-size: 0.75rem;
+  letter-spacing: 0.25em;
+  color: #C9A84C;
+  text-transform: uppercase;
+  margin-bottom: 20px;
+}
+
+.fp-collections-hero h2 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+  line-height: 1.1;
+}
+
+.fp-collections-hero h2 span {
+  color: #C9A84C;
+  text-shadow: 0 0 30px rgba(201,168,76,0.3);
+}
+
+.fp-collections-hero p {
+  font-family: 'Raleway', sans-serif;
+  font-size: clamp(1rem, 2vw, 1.15rem);
+  line-height: 1.85;
+  color: #7a8fa6;
+  max-width: 580px;
+  margin: 0 auto 16px;
+}
+
+.fp-gold-divider {
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #C9A84C, transparent);
+  opacity: 0.3;
+  margin: 0 0 40px;
+}
+
+.fp-hk-strip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 24px;
+  background: linear-gradient(135deg, rgba(46,125,79,0.08), rgba(10,25,42,0.6));
+  border-top: 1px solid rgba(76,175,120,0.2);
+  border-bottom: 1px solid rgba(76,175,120,0.2);
+  margin-bottom: 40px;
+}
+
+.fp-hk-strip img { width: 60px; height: 60px; object-fit: contain; }
+
+.fp-hk-strip-text {
+  font-family: 'Cinzel', serif;
+  font-size: 0.9rem;
+  letter-spacing: 0.15em;
+  color: #4caf78;
+  text-transform: uppercase;
+}
+
+.fp-hk-strip-text span {
+  display: block;
+  font-size: 0.75rem;
+  color: #7a8fa6;
+  letter-spacing: 0.1em;
+  margin-top: 3px;
+  font-family: 'Raleway', sans-serif;
+  text-transform: none;
+}
+
+.fp-mission-footer {
+  text-align: center;
+  padding: 48px 24px;
+  background: linear-gradient(to bottom, transparent, rgba(11,31,58,0.4), transparent);
+  margin-top: 40px;
+}
+
+.fp-mission-footer p {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(1rem, 2vw, 1.2rem);
+  color: #7a8fa6;
+  max-width: 580px;
+  margin: 0 auto 24px;
+  line-height: 1.8;
+}
+
+.fp-mission-footer p strong { color: #4caf78; font-weight: 500; }
+.fp-tagline { font-family: 'Cinzel', serif; font-size: 1.1rem; color: #fff; letter-spacing: 0.15em; }
+.fp-tagline span { color: #C9A84C; }
+</style>
+
+<!-- ══ HERO ══ -->
+<div class="fp-collections-hero">
+  <div class="fp-collections-badge">✦ Healthy Kindness Store</div>
+  <h2>The <span>Catalog</span></h2>
+  <p>Premium wellness products that support the Fifth Protocol — clean formulas, real ingredients, and every purchase funding the mission of educating communities with truth.</p>
+</div>
+
+<div class="fp-gold-divider"></div>
+
+<!-- ══ HK STRIP ══ -->
+<div class="fp-hk-strip">
+  <img src="https://cdn.shopify.com/s/files/1/0690/4522/3590/files/Gemini_Generated_Image_6bpfxl6bpfxl6bpf.png?v=1777678820" alt="Healthy Kindness"/>
+  <div class="fp-hk-strip-text">
+    Powered by Healthy Kindness
+    <span>Every purchase supports the Fifth Protocol mission</span>
+  </div>
+</div>
+
+<!-- ══ COLLECTION GRID — DO NOT REMOVE ══ -->
+<div class="collection-list-wrapper">
+  <div class="page-width">
+    <ul class="collection-list contains-card contains-card--collection grid grid--2-col-tablet grid--3-col-desktop" role="list">
+      {%- for collection in collections -%}
+        <li class="collection-list__item grid__item">
+          {% render 'card-collection',
+            card_collection: collection,
+            media_aspect_ratio: section.settings.image_ratio,
+            columns: 3
+          %}
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+</div>
+
+<!-- ══ MISSION FOOTER ══ -->
+<div class="fp-mission-footer">
+  <p>Every Healthy Kindness product is aligned with the <strong>Fifth Protocol mission</strong> — educating communities with truth and giving nonprofits a healthier way to fundraise.</p>
+  <div class="fp-tagline"><span>Be True.</span> Live Well.</div>
+</div>
+
+{% schema %}
+{
+  "name": "Collection list",
+  "settings": [
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "options": [
+        { "value": "adapt", "label": "Adapt to image" },
+        { "value": "portrait", "label": "Portrait" },
+        { "value": "square", "label": "Square" }
+      ],
+      "default": "square",
+      "label": "Image ratio"
+    }
+  ],
+  "presets": [
+    { "name": "Collection list" }
+  ]
+}
+{% endschema %}
