@@ -1,1 +1,0 @@
-Archer has write access.
