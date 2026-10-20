@@ -1,5 +1,4 @@
 name: Unzip Shopify Theme
-
 on:
   workflow_dispatch:
   push:
