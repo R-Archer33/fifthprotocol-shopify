@@ -1,0 +1,23 @@
+name: Unzip Theme
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+jobs:
+  unzip:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Unzip Theme File
+        run: |
+          unzip "theme_export_fifthprotocol-org-refresh_20OCT2026-0224am (1).zip"
+          rm "theme_export_fifthprotocol-org-refresh_20OCT2026-0224am (1).zip"
+      - name: Commit Unzipped Files
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add .
+          git commit -m "Automated Unzip of Theme"
+          git push
